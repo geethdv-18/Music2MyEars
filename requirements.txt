@@ -1,0 +1,11 @@
+streamlit
+requests
+python-dotenv
+Pillow
+plotly
+openai-whisper
+transformers
+torch
+scipy
+google-generativeai
+audio-recorder-streamlit
