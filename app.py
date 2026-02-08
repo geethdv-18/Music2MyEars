@@ -13,8 +13,424 @@ from st_audiorec import st_audiorec
 
 st.set_page_config(page_title="Music2MyEars", page_icon="🎵", layout="centered")
 
-st.title("Music2MyEars")
-st.caption("Turn your expression into personalized music")
+# ---------------------------------------------------------------------------
+# Midnight Studio CSS
+# ---------------------------------------------------------------------------
+MIDNIGHT_CSS = """
+<style>
+/* ── Google Fonts ───────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
+
+/* ── Root variables ─────────────────────────────────────────────────────── */
+:root {
+    --midnight-bg: #0D0D0F;
+    --surface: #16161A;
+    --glass-bg: rgba(30, 30, 36, 0.65);
+    --glass-border: rgba(255, 255, 255, 0.06);
+    --amber: #E8945A;
+    --amber-glow: rgba(232, 148, 90, 0.25);
+    --amber-dim: rgba(232, 148, 90, 0.12);
+    --coral: #FF6B6B;
+    --teal: #4ECDC4;
+    --text-primary: #E8E6E3;
+    --text-secondary: #8A8A8E;
+    --text-dim: #55555A;
+}
+
+/* ── App background + grain ─────────────────────────────────────────────── */
+.stApp {
+    background-color: var(--midnight-bg) !important;
+    font-family: 'Source Sans 3', sans-serif !important;
+}
+
+.stApp::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ── Typography ─────────────────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6,
+.stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
+    font-family: 'Outfit', sans-serif !important;
+    color: var(--text-primary) !important;
+    letter-spacing: -0.01em;
+}
+
+.stMarkdown p, .stMarkdown li, .stMarkdown span {
+    font-family: 'Source Sans 3', sans-serif !important;
+    color: var(--text-primary);
+}
+
+/* Captions */
+.stCaption, [data-testid="stCaptionContainer"] {
+    color: var(--text-secondary) !important;
+    font-family: 'Source Sans 3', sans-serif !important;
+}
+
+/* ── Text areas ─────────────────────────────────────────────────────────── */
+.stTextArea textarea {
+    background-color: var(--surface) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 10px !important;
+    color: var(--text-primary) !important;
+    font-family: 'Source Sans 3', sans-serif !important;
+    font-size: 0.95rem !important;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.stTextArea textarea:focus {
+    border-color: var(--amber) !important;
+    box-shadow: 0 0 0 3px var(--amber-glow) !important;
+}
+
+.stTextArea textarea::placeholder {
+    color: var(--text-dim) !important;
+}
+
+/* ── Text inputs ────────────────────────────────────────────────────────── */
+.stTextInput input {
+    background-color: var(--surface) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 10px !important;
+    color: var(--text-primary) !important;
+    font-family: 'Source Sans 3', sans-serif !important;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.stTextInput input:focus {
+    border-color: var(--amber) !important;
+    box-shadow: 0 0 0 3px var(--amber-glow) !important;
+}
+
+.stTextInput input::placeholder {
+    color: var(--text-dim) !important;
+}
+
+/* ── File uploader ──────────────────────────────────────────────────────── */
+[data-testid="stFileUploader"] {
+    background-color: var(--surface) !important;
+    border: 1.5px dashed var(--glass-border) !important;
+    border-radius: 12px !important;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+[data-testid="stFileUploader"]:hover {
+    border-color: var(--amber) !important;
+    box-shadow: 0 0 12px var(--amber-dim);
+}
+
+/* ── Generate button (primary) ──────────────────────────────────────────── */
+.stButton > button[kind="primary"],
+.stButton > button[data-testid="stBaseButton-primary"] {
+    background: linear-gradient(135deg, #E8945A 0%, #D4783E 100%) !important;
+    color: #0D0D0F !important;
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 1.05rem !important;
+    border: none !important;
+    border-radius: 14px !important;
+    padding: 0.65rem 1.8rem !important;
+    letter-spacing: 0.02em;
+    transition: transform 0.2s, box-shadow 0.3s !important;
+}
+
+.stButton > button[kind="primary"]:hover,
+.stButton > button[data-testid="stBaseButton-primary"]:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 24px var(--amber-glow), 0 0 40px var(--amber-dim) !important;
+}
+
+/* ── Secondary & download buttons ───────────────────────────────────────── */
+.stButton > button:not([kind="primary"]):not([data-testid="stBaseButton-primary"]),
+.stDownloadButton > button {
+    background-color: transparent !important;
+    color: var(--amber) !important;
+    border: 1.5px solid var(--amber) !important;
+    border-radius: 10px !important;
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 500 !important;
+    transition: background-color 0.2s, transform 0.2s !important;
+}
+
+.stButton > button:not([kind="primary"]):not([data-testid="stBaseButton-primary"]):hover,
+.stDownloadButton > button:hover {
+    background-color: var(--amber-dim) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ── Sliders ────────────────────────────────────────────────────────────── */
+.stSlider label {
+    font-family: 'Source Sans 3', sans-serif !important;
+    color: var(--text-secondary) !important;
+}
+
+.stSlider [data-testid="stThumbValue"] {
+    font-family: 'Outfit', sans-serif !important;
+    color: var(--amber) !important;
+    font-weight: 600 !important;
+}
+
+[data-testid="stSlider"] [role="slider"] {
+    background-color: var(--amber) !important;
+}
+
+/* ── Radio buttons ──────────────────────────────────────────────────────── */
+.stRadio [role="radiogroup"] {
+    gap: 0.4rem;
+}
+
+.stRadio [role="radiogroup"] label {
+    font-family: 'Source Sans 3', sans-serif !important;
+    border-radius: 20px !important;
+    padding: 0.25rem 0.75rem !important;
+    transition: background-color 0.2s;
+}
+
+.stRadio [role="radiogroup"] label[data-checked="true"] {
+    background-color: var(--amber-dim) !important;
+}
+
+/* ── Expanders ──────────────────────────────────────────────────────────── */
+[data-testid="stExpander"] {
+    background-color: var(--surface) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 14px !important;
+}
+
+[data-testid="stExpander"] summary {
+    font-family: 'Outfit', sans-serif !important;
+    color: var(--text-primary) !important;
+    transition: color 0.2s;
+}
+
+[data-testid="stExpander"] summary:hover {
+    color: var(--amber) !important;
+}
+
+/* ── Metric cards ───────────────────────────────────────────────────────── */
+[data-testid="stMetric"] {
+    background: var(--glass-bg) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 12px !important;
+    padding: 0.8rem !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+[data-testid="stMetricLabel"] {
+    font-family: 'Outfit', sans-serif !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    font-size: 0.7rem !important;
+    color: var(--text-secondary) !important;
+}
+
+[data-testid="stMetricValue"] {
+    font-family: 'Outfit', sans-serif !important;
+    color: var(--text-primary) !important;
+    font-weight: 600 !important;
+}
+
+[data-testid="stMetricDelta"] {
+    font-family: 'Source Sans 3', sans-serif !important;
+}
+
+/* ── Dividers ───────────────────────────────────────────────────────────── */
+hr {
+    border: none !important;
+    height: 1px !important;
+    background: linear-gradient(90deg, transparent 0%, var(--amber-dim) 50%, transparent 100%) !important;
+    margin: 1.5rem 0 !important;
+}
+
+/* ── Alert / info boxes ─────────────────────────────────────────────────── */
+[data-testid="stAlert"] {
+    border-radius: 12px !important;
+    font-family: 'Source Sans 3', sans-serif !important;
+}
+
+.stAlert [data-testid="stAlertContentInfo"] {
+    background-color: rgba(78, 205, 196, 0.08) !important;
+    border-left: 3px solid var(--teal) !important;
+}
+
+/* ── Toggle ─────────────────────────────────────────────────────────────── */
+[data-testid="stToggle"] label {
+    font-family: 'Source Sans 3', sans-serif !important;
+}
+
+/* ── Audio players ──────────────────────────────────────────────────────── */
+audio {
+    border-radius: 10px !important;
+    width: 100%;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--midnight-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-dim);
+}
+
+/* ── Image preview ──────────────────────────────────────────────────────── */
+[data-testid="stImage"] img {
+    border-radius: 12px !important;
+    border: 1px solid var(--glass-border) !important;
+}
+
+/* ── Animations ─────────────────────────────────────────────────────────── */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 20px var(--amber-dim); }
+    50%      { box-shadow: 0 0 36px var(--amber-glow); }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.5s ease-out both;
+}
+
+/* staggered delays for results sections */
+.fade-delay-1 { animation-delay: 0.1s; }
+.fade-delay-2 { animation-delay: 0.2s; }
+.fade-delay-3 { animation-delay: 0.3s; }
+.fade-delay-4 { animation-delay: 0.4s; }
+
+/* ── Custom header ──────────────────────────────────────────────────────── */
+.midnight-header {
+    text-align: center;
+    padding: 1.2rem 0 0.6rem 0;
+}
+
+.midnight-header h1 {
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 2.8rem !important;
+    background: linear-gradient(135deg, #E8945A 0%, #F0B27A 50%, #E8945A 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.2rem !important;
+    letter-spacing: -0.02em;
+}
+
+.midnight-header p {
+    font-family: 'Source Sans 3', sans-serif !important;
+    font-weight: 300 !important;
+    font-size: 1.15rem !important;
+    color: var(--text-secondary) !important;
+    margin-top: 0 !important;
+}
+
+/* ── Source badges ───────────────────────────────────────────────────────── */
+.source-badge {
+    display: inline-block;
+    padding: 0.15rem 0.65rem;
+    border-radius: 20px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-right: 0.4rem;
+    background-color: rgba(78, 205, 196, 0.12);
+    color: #4ECDC4;
+    border: 1px solid rgba(78, 205, 196, 0.2);
+}
+
+/* ── Version labels ─────────────────────────────────────────────────────── */
+.version-label {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+}
+
+.version-a { color: #4ECDC4; }
+.version-b { color: #FF6B6B; }
+
+/* ── Pipeline card headers ──────────────────────────────────────────────── */
+.pipeline-header {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #E8945A;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid rgba(232, 148, 90, 0.15);
+}
+
+/* ── Section header ─────────────────────────────────────────────────────── */
+.section-header {
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 600 !important;
+    color: var(--text-primary) !important;
+    font-size: 1.35rem !important;
+    margin-bottom: 0.6rem !important;
+}
+
+/* ── Success message ────────────────────────────────────────────────────── */
+[data-testid="stAlert"] [data-testid="stAlertContentSuccess"] {
+    background-color: rgba(78, 205, 196, 0.08) !important;
+    border-left: 3px solid var(--teal) !important;
+}
+
+/* ── Warning message ────────────────────────────────────────────────────── */
+[data-testid="stAlert"] [data-testid="stAlertContentWarning"] {
+    background-color: rgba(232, 148, 90, 0.08) !important;
+    border-left: 3px solid var(--amber) !important;
+}
+
+/* ── Error message ──────────────────────────────────────────────────────── */
+[data-testid="stAlert"] [data-testid="stAlertContentError"] {
+    background-color: rgba(255, 107, 107, 0.08) !important;
+    border-left: 3px solid var(--coral) !important;
+}
+
+/* ── st_audiorec widget ─────────────────────────────────────────────────── */
+iframe[title="st_audiorec.st_audiorec"] {
+    border-radius: 10px;
+}
+
+/* ── Learned rules expander content ─────────────────────────────────────── */
+[data-testid="stExpander"] .stMarkdown strong {
+    color: var(--amber) !important;
+}
+</style>
+"""
+
+st.markdown(MIDNIGHT_CSS, unsafe_allow_html=True)
+
+# --- HEADER ---
+st.markdown("""
+<div class="midnight-header">
+    <h1>Music2MyEars</h1>
+    <p>Turn your expression into personalized music</p>
+</div>
+""", unsafe_allow_html=True)
 
 # --- INPUT SECTION ---
 text_input = st.text_area(
@@ -196,11 +612,12 @@ if st.session_state.get("has_results"):
 
     # Emotions detected
     emotions = ai_profile.get("emotions", [ai_profile.get("emotion", "?")])
-    st.subheader(f"We sensed: {' + '.join(emotions)}")
+    st.markdown(f'<div class="section-header fade-in-up">We sensed: {" + ".join(emotions)}</div>', unsafe_allow_html=True)
 
     # Source badges
     sources_used = [m.get("source", "?") for m in mood_list]
-    st.caption(f"Sources: {', '.join(sources_used)}")
+    badge_html = " ".join(f'<span class="source-badge">{s.upper()}</span>' for s in sources_used)
+    st.markdown(f'<div class="fade-in-up fade-delay-1">{badge_html}</div>', unsafe_allow_html=True)
 
     # Profile comparison
     col_ai, col_final = st.columns(2)
@@ -218,11 +635,11 @@ if st.session_state.get("has_results"):
     if len(audio_list) >= 2:
         col_a, col_b = st.columns(2)
         with col_a:
-            st.caption("Version A")
+            st.markdown('<div class="version-label version-a">VERSION A</div>', unsafe_allow_html=True)
             st.audio(audio_list[0], format="audio/wav")
             st.download_button("Download A", audio_list[0], file_name="music2myears_A.wav", mime="audio/wav")
         with col_b:
-            st.caption("Version B")
+            st.markdown('<div class="version-label version-b">VERSION B</div>', unsafe_allow_html=True)
             st.audio(audio_list[1], format="audio/wav")
             st.download_button("Download B", audio_list[1], file_name="music2myears_B.wav", mime="audio/wav")
         preferred = st.radio("Which version do you prefer?", ["A", "B", "No preference"], horizontal=True, key="ab_pref")
@@ -237,40 +654,101 @@ if st.session_state.get("has_results"):
 
     # --- EXPLAINER ---
     st.divider()
-    st.subheader("How your input became music")
+    st.markdown('<div class="section-header fade-in-up">How your input became music</div>', unsafe_allow_html=True)
 
     narrative = explanation.get("narrative", "")
     if narrative:
         st.info(narrative)
 
-    timeline = explanation.get("timeline", [])
-    if timeline:
-        steps = [t.get("step", "") for t in timeline]
-        emotions = [t.get("emotion", "") for t in timeline]
-        descriptions = [t.get("description", "") for t in timeline]
+    # Radar chart: AI Profile vs Final Profile — Midnight Studio style
+    dims = ["Energy", "Style", "Warmth", "Arc"]
+    ai_vals = [ai_profile.get(d.lower(), 50) for d in dims]
+    final_vals = [final_profile.get(d.lower(), 50) for d in dims]
 
-        fig = go.Figure(go.Bar(
-            x=steps,
-            y=list(range(1, len(steps) + 1)),
-            text=emotions,
-            hovertext=descriptions,
-            marker_color=["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7"],
-            textposition="inside",
-        ))
-        fig.update_layout(
-            title="Pipeline Journey",
-            xaxis_title="Step",
-            yaxis_title="Stage",
-            yaxis=dict(showticklabels=False),
-            height=300,
-            margin=dict(t=40, b=40),
-        )
-        st.plotly_chart(fig, use_container_width=True)
+    fig = go.Figure()
+    fig.add_trace(go.Scatterpolar(
+        r=ai_vals + [ai_vals[0]],
+        theta=dims + [dims[0]],
+        name="AI Detected",
+        fill="toself",
+        fillcolor="rgba(78, 205, 196, 0.12)",
+        opacity=0.9,
+        line=dict(color="#4ECDC4", width=2),
+        marker=dict(size=5, color="#4ECDC4"),
+    ))
+    fig.add_trace(go.Scatterpolar(
+        r=final_vals + [final_vals[0]],
+        theta=dims + [dims[0]],
+        name="Final",
+        fill="toself",
+        fillcolor="rgba(232, 148, 90, 0.12)",
+        opacity=0.9,
+        line=dict(color="#E8945A", width=2),
+        marker=dict(size=5, color="#E8945A"),
+    ))
+    fig.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        polar=dict(
+            bgcolor="rgba(0,0,0,0)",
+            radialaxis=dict(
+                range=[0, 100],
+                showticklabels=True,
+                tickfont=dict(family="Source Sans 3", size=10, color="#55555A"),
+                gridcolor="rgba(255, 255, 255, 0.05)",
+                linecolor="rgba(255, 255, 255, 0.04)",
+            ),
+            angularaxis=dict(
+                tickfont=dict(family="Outfit", size=12, color="#8A8A8E"),
+                gridcolor="rgba(255, 255, 255, 0.05)",
+                linecolor="rgba(255, 255, 255, 0.04)",
+            ),
+        ),
+        height=350,
+        margin=dict(t=30, b=30, l=50, r=50),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.15,
+            xanchor="center",
+            x=0.5,
+            font=dict(family="Source Sans 3", size=12, color="#8A8A8E"),
+        ),
+        font=dict(family="Source Sans 3"),
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Pipeline flow cards
+    p1, p2, p3, p4 = st.columns(4)
+    with p1:
+        st.markdown('<div class="pipeline-header">Inputs</div>', unsafe_allow_html=True)
+        for s in sources_used:
+            st.write(f"- {s}")
+    with p2:
+        st.markdown('<div class="pipeline-header">Emotions</div>', unsafe_allow_html=True)
+        detected = ai_profile.get("emotions", [ai_profile.get("emotion", "?")])
+        for e in detected:
+            st.write(f"- {e}")
+    with p3:
+        st.markdown('<div class="pipeline-header">Profile</div>', unsafe_allow_html=True)
+        for d in dims:
+            ai_v = ai_profile.get(d.lower(), 50)
+            final_v = final_profile.get(d.lower(), 50)
+            delta = final_v - ai_v
+            st.metric(d, final_v, delta=delta if delta != 0 else None)
+    with p4:
+        st.markdown('<div class="pipeline-header">Music</div>', unsafe_allow_html=True)
+        key_desc = explanation.get("key_descriptors", [])
+        if key_desc:
+            for kd in key_desc:
+                st.write(f"- {kd}")
+        else:
+            st.write("*(no descriptors)*")
 
     st.divider()
 
     # --- FEEDBACK ---
-    st.subheader("Rate this track")
+    st.markdown('<div class="section-header">Rate this track</div>', unsafe_allow_html=True)
     rating = st.slider("How well does this music match your feeling?", 1, 5, 3, key="rating")
     would_replay = st.toggle("Would you listen to this again?", key="replay")
     user_note = st.text_input("Any specific feedback?", placeholder="e.g. 'Too slow for the energy I wanted'", key="user_note")

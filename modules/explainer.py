@@ -7,7 +7,7 @@ def explain_music(text_input, ai_profile, final_profile, overrides, music_prompt
 
     Returns dict with:
     - narrative: 2-3 sentence explanation
-    - timeline: list of {step, description, emotion} for Plotly chart
+    - key_descriptors: list of 3-4 short strings extracted from the music prompt
     """
     sources = ", ".join(ai_profile.get("sources", ["text"]))
     emotion = ai_profile.get("emotion", "neutral")
@@ -41,10 +41,7 @@ Music prompt: "{music_prompt[:200]}"
 {learning_context}
 Return ONLY a JSON object with:
 - narrative: 2-3 sentences explaining how the input emotion shaped the music. Mention the emotion, any overrides, and the resulting feel. Be warm and conversational.{' If the system has learned from past sessions, briefly mention how past feedback influenced this generation.' if reflection_count > 0 else ''}
-- timeline: a list of exactly 5 objects, each with:
-  - step: short label (e.g. "Input Analysis", "Emotion Detection", "Profile Tuning", "Prompt Creation", "Music Generation")
-  - description: one sentence about what happened at this step
-  - emotion: the dominant emotion at this stage (one word)
+- key_descriptors: a list of 3-4 short strings (2-3 words each) extracted from the music prompt that describe the most important musical qualities (e.g. "acoustic piano", "120 BPM", "bright tone", "slow build")
 
 Return ONLY valid JSON, no other text."""
 
