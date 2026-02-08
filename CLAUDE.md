@@ -15,7 +15,7 @@ Music2MyEars — a Streamlit app that turns text, images, and voice into AI-gene
 
 | Module | File | Does |
 |--------|------|------|
-| UI | `app.py` | Streamlit app — columns for image/voice, sliders, A/B comparison, Plotly explainer |
+| UI | `app.py` | Streamlit app — columns for image/voice, duration picker, sliders, A/B comparison, "What I've learned" panel, user notes, Plotly explainer |
 | Text Analyzer | `modules/text_analyzer.py` | Gemini text emotion → {moods[], mood, energy, source} |
 | Image Analyzer | `modules/image_analyzer.py` | Gemini vision → {caption, moods[], mood, energy, source} |
 | Voice Analyzer | `modules/voice_analyzer.py` | Whisper transcription + Gemini mood → {transcript, moods[], mood, energy, source} |
@@ -23,7 +23,7 @@ Music2MyEars — a Streamlit app that turns text, images, and voice into AI-gene
 | Music Orchestrator | `modules/music_orchestrator.py` | Converts profile → vivid MusicGen prompt via Gemini |
 | Music Generator | `modules/music_generator.py` | Batched MusicGen — generates 2 variations in one call |
 | Explainer | `modules/explainer.py` | Gemini generates narrative + 5-step timeline, includes learning status |
-| Feedback | `modules/feedback.py` | Ratings, A/B preference, reflection engine with learned rules |
+| Feedback | `modules/feedback.py` | Ratings, A/B preference, user notes, gen params, reflection engine with learned rules |
 | LLM Client | `utils/llm_client.py` | Gemini helpers: ask_json(), ask_json_with_image(), ask_text() |
 
 ## Key Patterns
@@ -38,6 +38,11 @@ Music2MyEars — a Streamlit app that turns text, images, and voice into AI-gene
   - MusicGen parameter correlation
 - **Range-clamping** — Fuser nudges AI values toward learned ranges (70/30 blend) instead of overwriting
 - **A/B preference** — Users pick preferred version, stored in feedback for future learning
+- **Duration control** — 5s/10s/20s via DURATION_TOKENS mapping to max_new_tokens (250/500/1000)
+- **"What I've learned" panel** — Displays global rules (positive/negative), per-emotion knowledge after reflections
+- **User notes** — Free-text feedback field stored alongside ratings for richer reflection input
+- **Gen params tracking** — Temperature, guidance_scale, max_new_tokens saved per session for parameter correlation
+- **Learning stats display** — Shows reflection count, active rules, emotions learned, countdown to next cycle
 
 ## Git Worktree Setup
 This project uses git worktrees for parallel Claude Code sessions:

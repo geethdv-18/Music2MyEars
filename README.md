@@ -34,10 +34,14 @@ app.py                  # Streamlit UI
 
 - **Multi-emotion detection** — Detects 1-3 emotions per input (e.g. "sad + hopeful + reflective"), blends them into slider values
 - **A/B comparison** — Two music variations generated in parallel, side-by-side playback with preference selection
+- **Duration control** — Choose 5s, 10s, or 20s track length
 - **Reflection engine** — Every 5 ratings, AI analyzes all feedback to extract prompt rules, per-emotion slider ranges, and parameter insights
+- **"What I've learned" panel** — Shows discovered rules, emotion-specific knowledge, and anti-patterns
 - **Range-clamping** — Learned knowledge nudges AI values toward proven ranges without overwriting contextual judgment
+- **User feedback notes** — Free-text feedback field (e.g. "Too slow for the energy I wanted")
 - **Download buttons** — Save your generated tracks as WAV files
 - **Multimodal parallel analysis** — Text, image, and voice analyzed simultaneously via ThreadPoolExecutor
+- **Learning stats** — After submitting feedback, see reflection count, active rules, and countdown to next learning cycle
 
 ## Setup
 
@@ -79,7 +83,9 @@ streamlit run app.py
    - **Warmth** — Deep and moody to bright and sparkling
    - **Arc** — Steady loop to dramatic build-up
 
-4. **Hit "Generate Music"** — The pipeline runs:
+4. **Pick a duration** — Choose 5s, 10s, or 20s for your track
+
+5. **Hit "Generate Music"** — The pipeline runs:
    - Analyzes all your inputs in parallel (detects multiple emotions)
    - Fuses them into one emotional profile (guided by past learning)
    - Creates a tailored music prompt
@@ -92,7 +98,7 @@ streamlit run app.py
    - The music prompt used (expandable)
    - An explainer showing how your input became music, with a Plotly pipeline chart
 
-6. **Rate and teach** — Rate the track, toggle "would listen again", and pick your preferred version. Every 5 ratings the system reflects on all feedback to improve future generations.
+7. **Rate and teach** — Rate the track, toggle "would listen again", pick your preferred version, and optionally leave a note. Every 5 ratings the system reflects on all feedback to improve future generations. Check the "What I've learned" panel to see discovered rules.
 
 ## Requirements
 
