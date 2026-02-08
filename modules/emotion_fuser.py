@@ -1,5 +1,19 @@
 from utils.llm_client import ask_json
-from modules.feedback import get_learned_defaults
+from modules.feedback import get_learned_defaults, get_emotion_profile
+
+
+def _range_clamp(ai_value, learned_range):
+    """Nudge AI value toward learned range if outside it.
+
+    If AI value is within range, keep it. If outside, blend 70% toward
+    the nearest boundary (preserves AI's contextual judgment).
+    """
+    lo, hi = learned_range
+    if lo <= ai_value <= hi:
+        return ai_value
+    # Outside range — nudge toward nearest boundary
+    nearest = lo if ai_value < lo else hi
+    return round(ai_value * 0.3 + nearest * 0.7)
 
 
 def fuse_emotions(mood_list):
@@ -39,11 +53,23 @@ Return ONLY the JSON object."""
     result = ask_json(prompt)
     result["sources"] = sources
 
-    # Apply learned defaults — blend with Gemini's values instead of overwriting
-    learned = get_learned_defaults(result.get("emotion", ""))
-    if learned:
+    # Apply learned knowledge — range-clamping instead of blind overwrite
+    emotion = result.get("emotion", "")
+    emo_profile = get_emotion_profile(emotion)
+
+    if emo_profile:
+        # Use range-clamping: keep AI value if in range, nudge if outside
+        pref = emo_profile.get("preferred_params", {})
         for key in ["energy", "style", "warmth", "arc"]:
-            if key in learned and key in result:
-                result[key] = round((result[key] + learned[key]) / 2)
+            range_key = f"{key}_range"
+            if range_key in pref and key in result:
+                result[key] = _range_clamp(result[key], pref[range_key])
+    else:
+        # Fallback: simple averaging with learned defaults
+        learned = get_learned_defaults(emotion)
+        if learned:
+            for key in ["energy", "style", "warmth", "arc"]:
+                if key in learned and key in result:
+                    result[key] = round((result[key] + learned[key]) / 2)
 
     return result
